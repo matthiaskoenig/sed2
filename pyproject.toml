@@ -1,0 +1,11 @@
+[project]
+name = "sed2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.13.4",
+    "rich>=15.0.0",
+    "sbmlutils>=0.9.6",
+]

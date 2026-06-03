@@ -1,0 +1,6 @@
+.tox
+.idea
+__pycache__
+dist
+src/sed2.egg-info/
+.venv
