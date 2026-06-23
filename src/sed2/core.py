@@ -21,19 +21,16 @@ class KisaoId(SEDBaseModel):
     pass
 
 SId = Annotated[str, StringConstraints(
-    min_length=3,
-    max_length=200,
-    pattern=r'^[a-zA-Z0-9_]+$', # FIXME
+    pattern=r'^[a-zA-Z_][a-zA-Z0-9_]*$',
     strip_whitespace=True,
 )]
+"""SBML-compatible identifier: letter or '_' followed by letters, digits, or '_'."""
 
-"""Reference to something else."""
 Reference = Annotated[str, StringConstraints(
-    min_length=3,
-    max_length=200,
-    pattern=r'^#[a-zA-Z0-9_]+$', # FIXME
+    pattern=r'^#[a-zA-Z_][a-zA-Z0-9_]*$',
     strip_whitespace=True,
 )]
+"""Reference to another task's output: '#' followed by an SId (e.g. '#model', '#data')."""
 
 class AltDefinition(SEDBaseModel):
     # FIXME
@@ -61,27 +58,37 @@ class OutputData(SEDBaseModel):
     pass
 
 class Data(SEDBaseModel):
-    """The value could be concrete data or a reference starting with # """
-    # FIXME better name
+    """A value passed between tasks — either a concrete literal or a Reference to another task's output.
+
+    Use a bare Python value (str, float, list, …) for literals, or a Reference string
+    starting with '#' to wire in another task's output (e.g. Data(value='#model')).
+    """
 
     value: Any
     accessors: Optional[list[str]] = None
-    datatypes: Optional[dict[str, DataType]] = None  # enum
+    datatypes: Optional[dict[str, DataType]] = None
     units: Optional[dict[str, Unit]] = None
-    annotation: Optional[dict[str, Any]] = None # how to make this local?
+    annotation: Optional[dict[str, Any]] = None
 
 
 class SEDBase(SEDBaseModel):
-    """Base class for SED2.
+    """Base class for all named SED2 domain objects.
+
+    Provides the four optional metadata fields shared by every element:
+    human-readable name/description, structured notes (Markdown), and
+    semantic annotations (MIRIAM-style BQB/BQM qualifiers).
     """
     name: Optional[str] = None
     description: Optional[str] = None
-    notes: Optional[Markdown] = None  # FIXME: proper Markdown type;
+    notes: Optional[Markdown] = None
     annotations: Optional[list[Annotation]] = None
 
+
 class TaskParameter(SEDBase):
-    """
-    # FIXME: require either kisaoId or altDefinition
+    """An algorithm parameter passed to a Task.
+
+    Identified either by a KisaoID (preferred, from the KISAO ontology) or an
+    AltDefinition for algorithms not yet in KISAO. Exactly one should be set.
     """
     kisaoID: Optional[KisaoId] = None
     altDefinition: Optional[AltDefinition] = None
@@ -89,60 +96,68 @@ class TaskParameter(SEDBase):
 
 
 class Range(SEDBase):
+    """An explicit list of values to iterate over."""
     values: Optional[list[Any]] = None
 
-class NumericRange(Range):
-    """
-    TODO: write the validation rules
-    """
 
+class NumericRange(Range):
+    """A numeric sweep defined by start/end boundaries.
+
+    Specify either `interval` (step size) or `numberOfSteps`; the other is
+    derived. `scale` controls spacing: 'linear' (default) or 'log10'.
+    """
     start: Optional[float] = None
     end: Optional[float] = None
-    interval: Optional[float] = None  # FIXME: positive float
-    numberOfSteps: Optional[int] = None  # positive integer
-    scale: Optional[str] = None  # "linear", "log10"
+    interval: Optional[float] = None
+    numberOfSteps: Optional[int] = None
+    scale: Optional[str] = None  # "linear" | "log10"
 
 
 
 
 class Task(SEDBase):
-    """
-    - map output dictionary to attribute access
-    - what to put in task parameters? what in the inputs?
+    """The central execution unit in a SED2 experiment.
+
+    A Task declares what algorithm to run (`type`, optionally `kisaoID`), what
+    it receives (`inputs`), how it is tuned (`taskParameters`), and what it
+    promises to produce (`outputs`).
+
+    Inputs and outputs use `Data` objects. An input whose `value` is a
+    Reference (e.g. `'#modelImport1'`) is wired to the named task's output at
+    runtime. Outputs are promises — downstream tasks reference them by the
+    task's `id`.
     """
     id: SId
     type: str
     kisaoID: Optional[KisaoId] = None
     altDefinition: Optional[AltDefinition] = None
-
-    taskParameters: Optional[dict[str, TaskParameter]] = None  # Optional, to change behavior or custumize
-    inputs: Optional[dict[str, Data]] = None  # Required
-
-    outputs: Optional[list[Data]] = None  # Promises
+    taskParameters: Optional[dict[str, TaskParameter]] = None
+    inputs: Optional[dict[str, Data]] = None
+    outputs: Optional[list[Data]] = None
 
 
 class ODESimulation(Task):
-    """Lots of documentation."""
+    """Task that integrates an ODE model over a time range."""
     pass
-    # lots of validation rules
+
 
 class ExplicitODESimulation(ODESimulation):
-    """Lots of documentation."""
+    """ODE simulation with fully explicit solver settings."""
     pass
-    # lots of validation rules
+
 
 class ModelImport(Task):
-    """Lots of documentation."""
-    pass
-    # lots of validation rules
+    """Task that loads a model from a file into the experiment.
 
-class Report(Task):
-    """Lots of documentation.
-
-    Just outputing it somewhere.
+    Typical inputs: 'location' (file path or URI) and 'language' (MIME/URN
+    identifying the model format, e.g. 'urn:sedml:language:sbml').
     """
     pass
-    # lots of validation rules
+
+
+class Report(Task):
+    """Task that writes selected simulation data to an output destination."""
+    pass
 
 
 # Implementations?
