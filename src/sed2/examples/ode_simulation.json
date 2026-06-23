@@ -1,0 +1,76 @@
+{
+  "id": "workflow1",
+  "tasks": {
+    "modelImport1": {
+      "id": "modelImport1",
+      "type": "modelImport",
+      "taskParameters": {
+        "encoding": {
+          "value": "utf-8"
+        },
+        "flatten-comp": {
+          "value": true
+        }
+      },
+      "inputs": {
+        "location": {
+          "value": "filename.xml"
+        },
+        "language": {
+          "value": "urn:sedml:language:sbml"
+        }
+      },
+      "outputs": {
+        "model": {}
+      }
+    },
+    "odeSimulation1": {
+      "id": "odeSimulation1",
+      "type": "explicitODESimulation",
+      "taskParameters": {
+        "absoluteTolerance": {
+          "value": 1e-6
+        }
+      },
+      "inputs": {
+        "model": {
+          "value": "#modelImport1.model"
+        },
+        "independentVariable": {
+          "value": "urn:time"
+        },
+        "independentVariableInit": {
+          "value": 0.0
+        },
+        "outputVariables": {
+          "value": [
+            "S1",
+            "S2"
+          ]
+        },
+        "range": {
+          "value": {
+            "start": 0.0,
+            "end": 100.0,
+            "numberOfSteps": 10
+          }
+        }
+      },
+      "outputs": {
+        "data": {}
+      }
+    },
+    "report1": {
+      "id": "report1",
+      "type": "report",
+      "inputs": {
+        "data": {
+          "value": "#odeSimulation1.data"
+        }
+      },
+      "outputs": {
+        "data": {}
+      }
+    }
+  }
+}

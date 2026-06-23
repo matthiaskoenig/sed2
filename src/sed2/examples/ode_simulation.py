@@ -62,5 +62,9 @@ workflow1 = Workflow(
 
 
 if __name__ == "__main__":
+    from pathlib import Path
+    from sed2.io import save_workflow
     from sed2.viz import print_workflow
+
     print_workflow(workflow1)
+    save_workflow(workflow1, Path(__file__).parent / "ode_simulation.json")
