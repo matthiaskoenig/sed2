@@ -1,0 +1,121 @@
+[
+  {
+    "description": "Load a model from a file into the experiment.",
+    "type": "modelImport",
+    "parameters": {
+      "encoding": {
+        "description": "File encoding (default: utf-8)",
+        "required": false
+      },
+      "flatten-comp": {
+        "description": "Flatten SBML comp package before loading",
+        "required": false
+      }
+    },
+    "inputs": {
+      "location": {
+        "description": "File path or URI of the model",
+        "required": true
+      },
+      "language": {
+        "description": "Model language URN (e.g. 'urn:sedml:language:sbml')",
+        "required": true
+      }
+    },
+    "outputs": {
+      "model": {
+        "description": "Loaded model object",
+        "required": true
+      }
+    }
+  },
+  {
+    "description": "Integrate an ODE model over a time range with explicit solver settings.",
+    "type": "explicitODESimulation",
+    "parameters": {
+      "absoluteTolerance": {
+        "description": "Absolute solver tolerance",
+        "required": false
+      },
+      "relativeTolerance": {
+        "description": "Relative solver tolerance",
+        "required": false
+      }
+    },
+    "inputs": {
+      "model": {
+        "description": "Model to simulate",
+        "required": true
+      },
+      "independentVariable": {
+        "description": "Independent variable URN (e.g. 'urn:time')",
+        "required": true
+      },
+      "independentVariableInit": {
+        "description": "Initial value of the independent variable",
+        "required": true
+      },
+      "outputVariables": {
+        "description": "List of variable names to record",
+        "required": true
+      },
+      "range": {
+        "description": "NumericRange or Range defining the integration interval",
+        "required": true
+      }
+    },
+    "outputs": {
+      "data": {
+        "description": "Simulation output (time \u00d7 variables matrix)",
+        "required": true
+      }
+    }
+  },
+  {
+    "description": "Write selected simulation data to an output destination.",
+    "type": "report",
+    "parameters": {},
+    "inputs": {
+      "data": {
+        "description": "Data to report",
+        "required": true
+      }
+    },
+    "outputs": {
+      "data": {
+        "description": "Written data",
+        "required": true
+      }
+    }
+  },
+  {
+    "description": "Read tabular data from a file into a DataFrame.",
+    "type": "dataRead",
+    "parameters": {
+      "separator": {
+        "description": "Column separator for delimited files (default: ',')",
+        "required": false
+      },
+      "header": {
+        "description": "Row number to use as column names (default: 0)",
+        "required": false
+      }
+    },
+    "inputs": {
+      "path": {
+        "description": "Path to the data file",
+        "required": true
+      },
+      "format": {
+        "description": "File format: csv, tsv, parquet (default: csv)",
+        "required": false
+      }
+    },
+    "outputs": {
+      "data": {
+        "description": "Loaded DataFrame",
+        "required": true
+      }
+    }
+  }
+]

@@ -10,6 +10,12 @@ dependencies = [
     "sbmlutils>=0.9.6",
 ]
 
+[project.optional-dependencies]
+dagster = [
+    "dagster>=1.9",
+    "pandas>=2.0",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",

@@ -160,8 +160,13 @@ class Report(Task):
     type: Literal["report"] = "report"
 
 
+class DataRead(Task):
+    """Task that reads tabular data from a file into a DataFrame."""
+    type: Literal["dataRead"] = "dataRead"
+
+
 AnyTask = Annotated[
-    Union[ModelImport, ExplicitODESimulation, Report],
+    Union[ModelImport, ExplicitODESimulation, Report, DataRead],
     Field(discriminator='type')
 ]
 """Discriminated union of all concrete task types.
