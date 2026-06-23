@@ -3,11 +3,11 @@
 FIXME: how to handle ids? dictionary keys?
 - ids on objects are nice, dictionaries are also nice (uniqueness requirements)
 """
-from typing import Optional, Union, Any, Annotated
+from typing import Optional, Union, Any, Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, StringConstraints, model_serializer
+from pydantic import BaseModel, StringConstraints, Field, model_serializer, model_validator
 from sbmlutils.metadata.miriam import BQB, BQM
-from sed2.console import console
+
 
 class SEDBaseModel(BaseModel):
 
@@ -19,6 +19,7 @@ class SEDBaseModel(BaseModel):
 class KisaoId(SEDBaseModel):
     # FIXME
     pass
+
 
 SId = Annotated[str, StringConstraints(
     pattern=r'^[a-zA-Z_][a-zA-Z0-9_]*$',
@@ -32,17 +33,21 @@ Reference = Annotated[str, StringConstraints(
 )]
 """Reference to another task's output: '#' followed by an SId (e.g. '#model', '#data')."""
 
+
 class AltDefinition(SEDBaseModel):
     # FIXME
     pass
+
 
 class DataType(SEDBaseModel):
     # FIXME
     pass
 
+
 class Unit(SEDBaseModel):
     # FIXME
     pass
+
 
 class Markdown(SEDBaseModel):
     # FIXME
@@ -52,19 +57,17 @@ class Markdown(SEDBaseModel):
 class Annotation(SEDBaseModel):
     """Annotation model."""
     value: str
-    qualifier: Union[BQB, BQB]
+    qualifier: Union[BQB, BQM]
 
-class OutputData(SEDBaseModel):
-    pass
 
 class Data(SEDBaseModel):
-    """A value passed between tasks — either a concrete literal or a Reference to another task's output.
+    """A value passed between tasks — either a concrete literal or a reference to another task's output.
 
-    Use a bare Python value (str, float, list, …) for literals, or a Reference string
-    starting with '#' to wire in another task's output (e.g. Data(value='#model')).
+    Use a bare Python value (str, float, list, …) for literals, or a string starting
+    with '#' to reference another task's output port (e.g. '#modelImport1.model').
+    Output port declarations leave `value` as None — the value is produced at runtime.
     """
-
-    value: Any
+    value: Any = None
     accessors: Optional[list[str]] = None
     datatypes: Optional[dict[str, DataType]] = None
     units: Optional[dict[str, Unit]] = None
@@ -113,8 +116,6 @@ class NumericRange(Range):
     scale: Optional[str] = None  # "linear" | "log10"
 
 
-
-
 class Task(SEDBase):
     """The central execution unit in a SED2 experiment.
 
@@ -122,10 +123,9 @@ class Task(SEDBase):
     it receives (`inputs`), how it is tuned (`taskParameters`), and what it
     promises to produce (`outputs`).
 
-    Inputs and outputs use `Data` objects. An input whose `value` is a
-    Reference (e.g. `'#modelImport1'`) is wired to the named task's output at
-    runtime. Outputs are promises — downstream tasks reference them by the
-    task's `id`.
+    Inputs are bound `Data` values; a value starting with '#taskId.portName'
+    references a named output port of another task. Outputs are named port
+    declarations; their values are produced at runtime by the implementation.
     """
     id: SId
     type: str
@@ -133,7 +133,7 @@ class Task(SEDBase):
     altDefinition: Optional[AltDefinition] = None
     taskParameters: Optional[dict[str, TaskParameter]] = None
     inputs: Optional[dict[str, Data]] = None
-    outputs: Optional[list[Data]] = None
+    outputs: Optional[dict[str, Data]] = None
 
 
 class ODESimulation(Task):
@@ -143,7 +143,7 @@ class ODESimulation(Task):
 
 class ExplicitODESimulation(ODESimulation):
     """ODE simulation with fully explicit solver settings."""
-    pass
+    type: Literal["explicitODESimulation"] = "explicitODESimulation"
 
 
 class ModelImport(Task):
@@ -152,21 +152,75 @@ class ModelImport(Task):
     Typical inputs: 'location' (file path or URI) and 'language' (MIME/URN
     identifying the model format, e.g. 'urn:sedml:language:sbml').
     """
-    pass
+    type: Literal["modelImport"] = "modelImport"
 
 
 class Report(Task):
     """Task that writes selected simulation data to an output destination."""
-    pass
+    type: Literal["report"] = "report"
 
 
-# Implementations?
-# class RoadrunnerSBMLModelImport implements ModelImport:
-#     supports input language:  "language": Data(value="urn:sedml:language:sbml"),
-#
+AnyTask = Annotated[
+    Union[ModelImport, ExplicitODESimulation, Report],
+    Field(discriminator='type')
+]
+"""Discriminated union of all concrete task types.
+
+Use as the value type in Workflow.tasks so Pydantic can deserialize the correct
+subclass from JSON based on the 'type' field.
+"""
 
 
+class PortSchema(SEDBaseModel):
+    """Schema for a single input, output, or parameter port on a task type."""
+    description: Optional[str] = None
+    required: bool = True
+    datatype: Optional[DataType] = None
+    units: Optional[Unit] = None
 
 
+class TaskDefinition(SEDBase):
+    """Abstract description of a task type stored in the task registry.
+
+    Defines the interface (port names and schemas) without specifying how the
+    task is implemented. The concrete Python implementation is registered
+    separately by matching on `type`. Serializes to/from JSON for the registry.
+    """
+    type: str
+    kisaoID: Optional[KisaoId] = None
+    parameters: dict[str, PortSchema] = {}
+    inputs: dict[str, PortSchema] = {}
+    outputs: dict[str, PortSchema] = {}
 
 
+class Workflow(SEDBase):
+    """An ordered collection of tasks connected via cross-references.
+
+    On construction, validates that every '#taskId' or '#taskId.portName'
+    reference in task inputs resolves to an existing task and declared output port.
+    """
+    id: SId
+    tasks: dict[SId, AnyTask]
+
+    @model_validator(mode='after')
+    def validate_references(self) -> 'Workflow':
+        for task in self.tasks.values():
+            for port_name, data in (task.inputs or {}).items():
+                if not (isinstance(data.value, str) and data.value.startswith('#')):
+                    continue
+                ref = data.value[1:]
+                ref_task_id, _, ref_port = ref.partition('.')
+                if ref_task_id not in self.tasks:
+                    raise ValueError(
+                        f"Task {task.id!r} input {port_name!r}: "
+                        f"'{data.value}' references unknown task '{ref_task_id}'"
+                    )
+                if ref_port:
+                    ref_outputs = self.tasks[ref_task_id].outputs or {}
+                    if ref_port not in ref_outputs:
+                        raise ValueError(
+                            f"Task {task.id!r} input {port_name!r}: "
+                            f"'{data.value}' references unknown output port '{ref_port}' "
+                            f"on task '{ref_task_id}'"
+                        )
+        return self
