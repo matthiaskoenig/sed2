@@ -51,6 +51,7 @@ report1 = Report(
     },
 )
 
+
 workflow1 = Workflow(
     id="workflow1",
     tasks={

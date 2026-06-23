@@ -71,7 +71,8 @@ The Dagster backend implements SED2 task types as Dagster ops. Requires `sed2[da
 ### Start the Dagster UI
 
 ```bash
-dagster dev -f src/sed2/implementations/dagster/jobs.py
+uv pip install 'sed2[dagster]'
+uv run dagster dev -f src/sed2/implementations/dagster/jobs.py
 ```
 
 Open **http://localhost:3000** in a browser. The UI shows all registered jobs, lets you launch runs with configured inputs, inspect the op graph, and view logs and output metadata for each run.
