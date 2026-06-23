@@ -16,6 +16,9 @@ dagster = [
     "dagster-webserver>=1.9",
     "pandas>=2.0",
 ]
+web = [
+    "streamlit>=1.35",
+]
 
 [dependency-groups]
 dev = [

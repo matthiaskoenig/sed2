@@ -8,7 +8,7 @@ MODEL_IMPORT = TaskDefinition(
     type="modelImport",
     description="Load a model from a file into the experiment.",
     inputs={
-        "location": PortSchema(description="File path or URI of the model", required=True),
+        "location": PortSchema(description="File path or URI of the model", required=True, datatype="str"),
         "language": PortSchema(description="Model language URN (e.g. 'urn:sedml:language:sbml')", required=True),
     },
     parameters={

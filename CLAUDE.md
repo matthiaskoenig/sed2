@@ -10,14 +10,23 @@ This project uses `uv` for package management.
 # Install dependencies
 uv sync
 
-# Run the core module directly (demonstrates the data model)
-uv run python src/sed2/core.py
-
-# Run a specific test file
-uv run pytest tests/path/to/test_file.py
-
 # Run all tests
 uv run pytest
+
+# Run a specific test file
+uv run pytest tests/test_core.py
+
+# Regenerate schemas/  (after changing core.py models)
+uv run python -m sed2.schema
+
+# Regenerate registry/repository.json  (after changing registry/definitions.py)
+uv run python -m sed2.registry.definitions
+
+# Web interface (requires uv pip install 'sed2[web]')
+uv run streamlit run src/sed2/webapp.py
+
+# Dagster UI (requires uv pip install 'sed2[dagster]')
+uv run dagster dev -f src/sed2/implementations/dagster/jobs.py
 ```
 
 ## Architecture

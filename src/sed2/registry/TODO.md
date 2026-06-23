@@ -1,0 +1,3 @@
+- get rid of the parameters
+- enforce datatypes & check data type compatibility
+- 

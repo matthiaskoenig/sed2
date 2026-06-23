@@ -1,0 +1,890 @@
+{
+  "$defs": {
+    "AltDefinition": {
+      "properties": {},
+      "title": "AltDefinition",
+      "type": "object"
+    },
+    "Annotation": {
+      "description": "Annotation model.",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "qualifier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BQB"
+            },
+            {
+              "$ref": "#/$defs/BQM"
+            }
+          ],
+          "title": "Qualifier"
+        }
+      },
+      "required": [
+        "value",
+        "qualifier"
+      ],
+      "title": "Annotation",
+      "type": "object"
+    },
+    "BQB": {
+      "description": "MIRIAM biological qualifier.",
+      "enum": [
+        "BQB_IS",
+        "BQB_HAS_PART",
+        "BQB_IS_PART_OF",
+        "BQB_IS_VERSION_OF",
+        "BQB_HAS_VERSION",
+        "BQB_IS_HOMOLOG_TO",
+        "BQB_IS_DESCRIBED_BY",
+        "BQB_IS_ENCODED_BY",
+        "BQB_ENCODES",
+        "BQB_OCCURS_IN",
+        "BQB_HAS_PROPERTY",
+        "BQB_IS_PROPERTY_OF",
+        "BQB_HAS_TAXON",
+        "BQB_UNKNOWN"
+      ],
+      "title": "BQB",
+      "type": "string"
+    },
+    "BQM": {
+      "description": "MIRIAM model qualifier.",
+      "enum": [
+        "BQM_IS",
+        "BQM_IS_DESCRIBED_BY",
+        "BQM_IS_DERIVED_FROM",
+        "BQM_IS_INSTANCE_OF",
+        "BQM_HAS_INSTANCE",
+        "BQM_UNKNOWN"
+      ],
+      "title": "BQM",
+      "type": "string"
+    },
+    "Data": {
+      "description": "A value passed between tasks \u2014 either a concrete literal or a reference to another task's output.\n\nUse a bare Python value (str, float, list, \u2026) for literals, or a string starting\nwith '#' to reference another task's output port (e.g. '#modelImport1.model').\nOutput port declarations leave `value` as None \u2014 the value is produced at runtime.",
+      "properties": {
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "accessors": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accessors"
+        },
+        "datatypes": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/DataType"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Datatypes"
+        },
+        "units": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Unit"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        },
+        "annotation": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annotation"
+        }
+      },
+      "title": "Data",
+      "type": "object"
+    },
+    "DataRead": {
+      "description": "Task that reads tabular data from a file into a DataFrame.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Markdown"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "annotations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Annotation"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annotations"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "dataRead",
+          "default": "dataRead",
+          "title": "Type",
+          "type": "string"
+        },
+        "kisaoID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KisaoId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "altDefinition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AltDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "taskParameters": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/TaskParameter"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Taskparameters"
+        },
+        "inputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputs"
+        },
+        "outputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputs"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DataRead",
+      "type": "object"
+    },
+    "DataType": {
+      "properties": {},
+      "title": "DataType",
+      "type": "object"
+    },
+    "ExplicitODESimulation": {
+      "description": "ODE simulation with fully explicit solver settings.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Markdown"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "annotations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Annotation"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annotations"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "explicitODESimulation",
+          "default": "explicitODESimulation",
+          "title": "Type",
+          "type": "string"
+        },
+        "kisaoID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KisaoId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "altDefinition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AltDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "taskParameters": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/TaskParameter"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Taskparameters"
+        },
+        "inputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputs"
+        },
+        "outputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputs"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "ExplicitODESimulation",
+      "type": "object"
+    },
+    "KisaoId": {
+      "properties": {},
+      "title": "KisaoId",
+      "type": "object"
+    },
+    "Markdown": {
+      "properties": {},
+      "title": "Markdown",
+      "type": "object"
+    },
+    "ModelImport": {
+      "description": "Task that loads a model from a file into the experiment.\n\nTypical inputs: 'location' (file path or URI) and 'language' (MIME/URN\nidentifying the model format, e.g. 'urn:sedml:language:sbml').",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Markdown"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "annotations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Annotation"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annotations"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "modelImport",
+          "default": "modelImport",
+          "title": "Type",
+          "type": "string"
+        },
+        "kisaoID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KisaoId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "altDefinition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AltDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "taskParameters": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/TaskParameter"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Taskparameters"
+        },
+        "inputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputs"
+        },
+        "outputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputs"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "ModelImport",
+      "type": "object"
+    },
+    "Report": {
+      "description": "Task that writes selected simulation data to an output destination.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Markdown"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "annotations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Annotation"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annotations"
+        },
+        "id": {
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "report",
+          "default": "report",
+          "title": "Type",
+          "type": "string"
+        },
+        "kisaoID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KisaoId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "altDefinition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AltDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "taskParameters": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/TaskParameter"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Taskparameters"
+        },
+        "inputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputs"
+        },
+        "outputs": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Data"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputs"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Report",
+      "type": "object"
+    },
+    "TaskParameter": {
+      "description": "An algorithm parameter passed to a Task.\n\nIdentified either by a KisaoID (preferred, from the KISAO ontology) or an\nAltDefinition for algorithms not yet in KISAO. Exactly one should be set.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Markdown"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "annotations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Annotation"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annotations"
+        },
+        "kisaoID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/KisaoId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "altDefinition": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AltDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "TaskParameter",
+      "type": "object"
+    },
+    "Unit": {
+      "properties": {},
+      "title": "Unit",
+      "type": "object"
+    }
+  },
+  "description": "An ordered collection of tasks connected via cross-references.\n\nOn construction, validates that every '#taskId' or '#taskId.portName'\nreference in task inputs resolves to an existing task and declared output port.",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Name"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Markdown"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "annotations": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Annotation"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Annotations"
+    },
+    "id": {
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "tasks": {
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "discriminator": {
+            "mapping": {
+              "dataRead": "#/$defs/DataRead",
+              "explicitODESimulation": "#/$defs/ExplicitODESimulation",
+              "modelImport": "#/$defs/ModelImport",
+              "report": "#/$defs/Report"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ModelImport"
+            },
+            {
+              "$ref": "#/$defs/ExplicitODESimulation"
+            },
+            {
+              "$ref": "#/$defs/Report"
+            },
+            {
+              "$ref": "#/$defs/DataRead"
+            }
+          ]
+        }
+      },
+      "title": "Tasks",
+      "type": "object"
+    }
+  },
+  "required": [
+    "id",
+    "tasks"
+  ],
+  "title": "Workflow",
+  "type": "object"
+}

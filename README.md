@@ -10,7 +10,21 @@ uv sync
 
 # With Dagster execution backend
 uv pip install -e '.[dagster]'
+
+# With web interface
+uv pip install -e '.[web]'
 ```
+
+## Web interface
+
+A Streamlit form-based UI for building workflow JSON visually:
+
+```bash
+uv pip install 'sed2[web]'
+uv run streamlit run src/sed2/webapp.py
+```
+
+Open **http://localhost:8501**. The left panel lets you select a task type (populated from the registry), fill in its inputs and parameters, and add it to the workflow. The right panel shows the live JSON and offers a download button.
 
 ## Data model
 
