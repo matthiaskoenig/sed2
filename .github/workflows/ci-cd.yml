@@ -1,0 +1,134 @@
+name: CI-CD
+
+on:
+  push:
+    # feature branches are tested through their pull request, tags release
+    branches: [develop, main]
+    tags: ['*']
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+
+# least privilege by default, the release and sync jobs raise what they need
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # superseded branch runs are cancelled, release runs are never cancelled
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.13", "3.14"]
+        # linux covers the full range, windows and macos only the newest version
+        exclude:
+          - os: windows-latest
+            python-version: "3.13"
+          - os: macos-latest
+            python-version: "3.13"
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Install uv and set the python version
+      # astral-sh/setup-uv publishes no floating major tag beyond v7
+      uses: astral-sh/setup-uv@v10.0.1
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+    - name: Test with tox
+      run:
+        uvx --with tox-uv tox -e py${{ matrix.python-version }}
+
+  extras:
+    # the dagster backend and the streamlit app are optional; they are
+    # exercised here rather than in the matrix, so that a backend which breaks
+    # is a single red job instead of every cell
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v10.0.1
+      with:
+        python-version: "3.13"
+        enable-cache: true
+    - name: Test the optional backends with tox
+      run:
+        uvx --with tox-uv tox -e extras
+
+  tests:
+    # the one check the branch protection requires; the names of the matrix
+    # jobs change with the matrix, this name does not
+    name: tests
+    needs: [test, extras]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Check the result of the test matrix
+      env:
+        MATRIX: ${{ needs.test.result }}
+        EXTRAS: ${{ needs.extras.result }}
+      run: |
+        echo "test matrix: $MATRIX"
+        echo "extras:      $EXTRAS"
+        test "$MATRIX" = "success"
+        test "$EXTRAS" = "success"
+
+  release:
+    needs: tests
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write  # create the GitHub release
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Install uv
+      uses: astral-sh/setup-uv@v10.0.1
+      with:
+        python-version: "3.14"
+        enable-cache: true
+    - name: Build package
+      # sed2 is a prototype and is not published to pypi; the build runs so
+      # that it is known to work, see docs/development.md
+      run: uvx hatch build
+    - name: Check the package
+      run: uvx twine check dist/*
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v3
+      with:
+        body_path: "release-notes/${{ github.ref_name }}.md"
+        files: dist/*
+        draft: false
+        prerelease: false
+
+  sync-main:
+    # main tracks the latest release, see docs/development.md
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write  # fast-forward main to the released commit
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        # a shallow clone cannot be pushed to another branch
+        fetch-depth: 0
+    - name: Fast-forward main to the release
+      # no --force: the push fails loudly if it would not be a fast-forward
+      run: git push origin HEAD:main

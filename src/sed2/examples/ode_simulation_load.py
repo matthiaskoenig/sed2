@@ -1,4 +1,5 @@
 """Load the ODE simulation workflow from JSON and visualize it."""
+
 from pathlib import Path
 
 from sed2.io import load_workflow

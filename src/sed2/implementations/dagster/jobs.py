@@ -4,17 +4,21 @@ Start the Dagster UI with:
     uv pip install 'sed2[dagster]'
     uv run dagster dev -f src/sed2/implementations/dagster/jobs.py
 """
+
 from pathlib import Path
 
-from dagster import Definitions, RunConfig, job
+from dagster import Definitions, job
 
 from sed2.implementations.dagster.ops import data_read_op
 
 _EXAMPLE_CSV = str(Path(__file__).parents[2] / "examples" / "input_data.csv")
 
 
-@job(description="Read tabular data from a file (CSV, TSV, or Parquet) into a DataFrame.")
+@job(
+    description="Read tabular data from a file (CSV, TSV, or Parquet) into a DataFrame."
+)
 def data_read_job():
+    """Read tabular data, the path and the format come from the run config."""
     data_read_op()
 
 
@@ -32,6 +36,7 @@ def data_read_job():
     },
 )
 def ode_output_read_job():
+    """Read the example csv, the run config is baked into the job."""
     data_read_op()
 
 

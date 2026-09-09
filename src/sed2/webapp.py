@@ -4,6 +4,7 @@ Run with:
     uv pip install 'sed2[web]'
     uv run streamlit run src/sed2/webapp.py
 """
+
 import streamlit as st
 
 import sed2.registry as registry
@@ -37,7 +38,8 @@ def _build_task(
     return cls(
         id=task_id,
         inputs={k: Data(value=v) for k, v in inputs.items() if v} or None,
-        taskParameters={k: TaskParameter(value=v) for k, v in params.items() if v} or None,
+        taskParameters={k: TaskParameter(value=v) for k, v in params.items() if v}
+        or None,
         outputs={port: Data() for port in td.outputs},
     )
 
@@ -69,11 +71,13 @@ def _task_form(task_type: str) -> None:
 
 
 def main() -> None:
+    """Render the workflow builder."""
     st.set_page_config(page_title="SED2 Workflow Builder", layout="wide")
     st.title("SED2 Workflow Builder")
 
     if "tasks" not in st.session_state:
-        st.session_state.tasks: dict[str, AnyTask] = {}
+        tasks: dict[str, AnyTask] = {}
+        st.session_state.tasks = tasks
 
     left, right = st.columns(2)
 
@@ -97,7 +101,9 @@ def main() -> None:
 
         if st.button("Add task", type="primary"):
             td = registry.get(task_type)
-            inputs = {port: st.session_state.get(f"inp_{port}", "") for port in td.inputs}
+            inputs = {
+                port: st.session_state.get(f"inp_{port}", "") for port in td.inputs
+            }
             params = {p: st.session_state.get(f"prm_{p}", "") for p in td.parameters}
             try:
                 task = _build_task(task_type, task_id, inputs, params)
@@ -112,7 +118,9 @@ def main() -> None:
             st.subheader("Tasks in workflow")
             for tid in list(st.session_state.tasks):
                 col_label, col_btn = st.columns([5, 1])
-                col_label.markdown(f"**{tid}** &nbsp; `{st.session_state.tasks[tid].type}`")
+                col_label.markdown(
+                    f"**{tid}** &nbsp; `{st.session_state.tasks[tid].type}`"
+                )
                 if col_btn.button("✕", key=f"rm_{tid}", help=f"Remove {tid}"):
                     del st.session_state.tasks[tid]
                     st.rerun()

@@ -2,6 +2,8 @@
 
 Python prototype of SED2 (Simulation Experiment Description v2) — a format for defining and executing computational simulation experiments. Workflows are built from typed tasks connected by named data ports, serialized to JSON, and executed by pluggable backends.
 
+**Documentation: [matthiaskoenig.github.io/sed2](https://matthiaskoenig.github.io/sed2)**
+
 ## Installation
 
 ```bash
@@ -9,10 +11,13 @@ Python prototype of SED2 (Simulation Experiment Description v2) — a format for
 uv sync
 
 # With Dagster execution backend
-uv pip install -e '.[dagster]'
+uv sync --extra dagster
 
 # With web interface
-uv pip install -e '.[web]'
+uv sync --extra web
+
+# Everything, including the development tooling
+uv sync --extra dev
 ```
 
 ## Web interface
@@ -51,7 +56,7 @@ Abstract task interfaces are stored in `src/sed2/registry/repository.json`. To l
 import sed2.registry as registry
 
 td = registry.get("dataRead")
-print(td.inputs)   # {'path': PortSchema(...), 'format': PortSchema(...)}
+print(td.inputs)  # {'path': PortSchema(...), 'format': PortSchema(...)}
 print(td.outputs)  # {'data': PortSchema(...)}
 ```
 
@@ -75,6 +80,7 @@ workflow = load_workflow(Path("workflow.json"))
 
 ```python
 from sed2.viz import print_workflow
+
 print_workflow(workflow)
 ```
 
@@ -157,6 +163,19 @@ uv run python -m sed2.examples.ode_simulation_load
 
 ```bash
 uv run pytest
-uv run pytest tests/test_core.py   # SId / Reference validation
+uv run pytest tests/test_core.py      # SId / Reference validation
 uv run pytest tests/test_workflow.py  # Workflow validation and task registry
+uv run pytest tests/test_dagster.py   # Dagster backend, needs the dagster extra
 ```
+
+The full matrix, as continuous integration runs it:
+
+```bash
+uv run tox run-parallel
+```
+
+## Contributing
+
+Development happens against the `develop` branch via pull requests, with `ruff`,
+`ty`, the test matrix and the documentation build as required checks. See
+[docs/development.md](docs/development.md).

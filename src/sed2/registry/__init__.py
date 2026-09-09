@@ -1,4 +1,5 @@
 """Task registry — load and look up abstract task definitions from repository.json."""
+
 import json
 from pathlib import Path
 

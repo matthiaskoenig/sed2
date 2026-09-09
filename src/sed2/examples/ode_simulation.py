@@ -1,4 +1,5 @@
 """Example SED2 experiment: import an SBML model, run an ODE simulation, write a report."""
+
 from sed2.core import (
     Data,
     ExplicitODESimulation,
@@ -64,6 +65,7 @@ workflow1 = Workflow(
 
 if __name__ == "__main__":
     from pathlib import Path
+
     from sed2.io import save_workflow
     from sed2.viz import print_workflow
 
