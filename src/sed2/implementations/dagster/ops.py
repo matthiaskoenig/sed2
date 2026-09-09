@@ -1,6 +1,6 @@
 """Dagster ops implementing SED2 task types.
 
-Requires: pip install 'sed2[dagster]'
+Requires the `dagster` extra, i.e. `uv sync --extra dagster`.
 """
 
 import pandas as pd

@@ -25,7 +25,7 @@ uv sync --extra dev
 A Streamlit form-based UI for building workflow JSON visually:
 
 ```bash
-uv pip install 'sed2[web]'
+uv sync --extra web
 uv run streamlit run src/sed2/webapp.py
 ```
 
@@ -91,7 +91,7 @@ The Dagster backend implements SED2 task types as Dagster ops. Requires `sed2[da
 ### Start the Dagster UI
 
 ```bash
-uv pip install 'sed2[dagster]'
+uv sync --extra dagster
 uv run dagster dev -f src/sed2/implementations/dagster/jobs.py
 ```
 

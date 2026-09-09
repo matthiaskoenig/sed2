@@ -1,7 +1,7 @@
 """Web interface for building SED2 workflow JSON visually.
 
 Run with:
-    uv pip install 'sed2[web]'
+    uv sync --extra web
     uv run streamlit run src/sed2/webapp.py
 """
 

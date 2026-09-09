@@ -1,7 +1,7 @@
 """Dagster job definitions for SED2 task implementations.
 
 Start the Dagster UI with:
-    uv pip install 'sed2[dagster]'
+    uv sync --extra dagster
     uv run dagster dev -f src/sed2/implementations/dagster/jobs.py
 """
 
