@@ -1,3 +1,10 @@
+# working files of coding agents, their design documents and plans are not committed
+.superpowers/
+docs/superpowers/
+# (only the dated agent designs in specs/, which may hold a specification of SED2 one day)
+specs/????-??-??-*-design.md
+plans/
+
 .tox
 .idea
 __pycache__
