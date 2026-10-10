@@ -84,6 +84,11 @@ icon = "fontawesome/brands/github"
 link = "https://github.com/matthiaskoenig/sed2"
 
 # API reference is rendered from the docstrings, see the `docs/api` pages
+# `docs/superpowers` holds the design documents and plans of coding agents,
+# gitignored and no pages
+[project.plugins.exclude]
+glob = ["superpowers/*"]
+
 [project.plugins.mkdocstrings]
 default_handler = "python"
 

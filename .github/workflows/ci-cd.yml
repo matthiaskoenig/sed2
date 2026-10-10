@@ -15,24 +15,28 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  # superseded branch runs are cancelled, release runs are never cancelled
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  # a newer run supersedes the running one of the same branch or pull request;
+  # a release is never superseded, every tag is a group of its own
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.13", "3.14"]
-        # linux covers the full range, windows and macos only the newest version
-        exclude:
+        # continuous integration tests the newest python on every platform;
+        # linux runs it with the optional dagster and web backends (the `extras`
+        # environment, the whole suite with them installed). python 3.13 is
+        # tested locally with `tox run-parallel`, see docs/development.md
+        include:
+          - os: ubuntu-latest
+            tox-env: extras
           - os: windows-latest
-            python-version: "3.13"
+            tox-env: py3.14
           - os: macos-latest
-            python-version: "3.13"
+            tox-env: py3.14
 
     steps:
     - uses: actions/checkout@v7
@@ -42,36 +46,22 @@ jobs:
       # astral-sh/setup-uv publishes no floating major tag beyond v7
       uses: astral-sh/setup-uv@v10.0.1
       with:
-        python-version: ${{ matrix.python-version }}
-        enable-cache: true
+        python-version: "3.14"
+        # a release run restores no cache, the package is built without one
+        enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }}  # zizmor: ignore[cache-poisoning]
+        # the interpreter is cached with the packages instead of downloaded by every run
+        cache-python: ${{ !startsWith(github.ref, 'refs/tags/') }}  # zizmor: ignore[cache-poisoning]
     - name: Test with tox
-      run:
-        uvx --with tox-uv tox -e py${{ matrix.python-version }}
-
-  extras:
-    # the dagster backend and the streamlit app are optional; they are
-    # exercised here rather than in the matrix, so that a backend which breaks
-    # is a single red job instead of every cell
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-    - uses: actions/checkout@v7
-      with:
-        persist-credentials: false
-    - name: Install uv and set the python version
-      uses: astral-sh/setup-uv@v10.0.1
-      with:
-        python-version: "3.13"
-        enable-cache: true
-    - name: Test the optional backends with tox
-      run:
-        uvx --with tox-uv tox -e extras
+      env:
+        TOX_ENV: ${{ matrix.tox-env }}
+      run: uvx --with tox-uv tox -e "${TOX_ENV}" -- --durations=15
+      shell: bash
 
   tests:
     # the one check the branch protection requires; the names of the matrix
     # jobs change with the matrix, this name does not
     name: tests
-    needs: [test, extras]
+    needs: test
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -79,12 +69,9 @@ jobs:
     - name: Check the result of the test matrix
       env:
         MATRIX: ${{ needs.test.result }}
-        EXTRAS: ${{ needs.extras.result }}
       run: |
         echo "test matrix: $MATRIX"
-        echo "extras:      $EXTRAS"
         test "$MATRIX" = "success"
-        test "$EXTRAS" = "success"
 
   release:
     needs: tests
@@ -101,7 +88,8 @@ jobs:
       uses: astral-sh/setup-uv@v10.0.1
       with:
         python-version: "3.14"
-        enable-cache: true
+        # a release is built from a clean state, never from a restored cache
+        enable-cache: false
     - name: Build package
       # sed2 is a prototype and is not published to pypi; the build runs so
       # that it is known to work, see docs/development.md

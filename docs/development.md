@@ -29,13 +29,20 @@ A pull request can only be merged once the four required checks are green:
 
 | check   | workflow    | content                                                          |
 | ------- | ----------- | ---------------------------------------------------------------- |
-| `tests` | `ci-cd.yml` | the test matrix, linux, macos and windows with python 3.13 and 3.14 |
+| `tests` | `ci-cd.yml` | the test matrix, python 3.14 on linux (with the extras), macos and windows |
 | `ruff`  | `ruff.yml`  | `ruff check` and `ruff format --check`                            |
 | `ty`    | `ty.yml`    | `tox r -e ty`                                                     |
 | `docs`  | `docs.yml`  | the zensical build including the api reference and the agent files |
 
-`tests` aggregates the test matrix and the `extras` job into a single job, so
-the name of the required check stays the same when the matrix changes.
+`tests` aggregates the test matrix into a single job, so the name of the
+required check stays the same when the matrix changes.
+
+Continuous integration is kept small: every workflow cancels its running build
+when a newer commit of the same branch or pull request arrives, uv caches the
+packages and the interpreters between runs, a pull request builds the
+documentation without uploading it, and the matrix tests only the newest
+python. Python 3.13 is tested locally, see [Testing](#testing), before a pull
+request is opened.
 
 Further rules of a pull request:
 
@@ -153,8 +160,10 @@ tox run-parallel
 ```
 
 This needs the interpreters to be available, which uv installs with
-`uv python install 3.13 3.14`. Continuous integration runs the same
-environments as `uvx --with tox-uv tox -e py3.13`.
+`uv python install 3.13 3.14`. It is the complete test and is run before a
+pull request is opened: continuous integration runs only python 3.14, the
+`extras` environment on linux and `py3.14` on macos and windows, as
+`uvx --with tox-uv tox -e py3.14`.
 
 To run the tests directly against the development environment use
 
@@ -166,10 +175,9 @@ pytest tests/test_core.py::test_letter_start  # a single test
 
 `tests/test_dagster.py` covers the [dagster backend](concepts/backends.md) and
 skips itself when the `dagster` extra is not installed. The `extras`
-environment of tox is the one which installs it, and the `extras` job of the
-`CI-CD` workflow is where it runs in continuous integration. The other
-environments run without the optional backends, so a backend which breaks does
-not redden the whole matrix.
+environment of tox is the one which installs it, and the linux job of the
+`CI-CD` workflow runs it in continuous integration. The other environments run
+without the optional backends.
 
 ## Linting and formatting
 

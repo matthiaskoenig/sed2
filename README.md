@@ -168,7 +168,7 @@ uv run pytest tests/test_workflow.py  # Workflow validation and task registry
 uv run pytest tests/test_dagster.py   # Dagster backend, needs the dagster extra
 ```
 
-The full matrix, as continuous integration runs it:
+The full matrix, run locally before a pull request is opened (continuous integration runs python 3.14 only):
 
 ```bash
 uv run tox run-parallel

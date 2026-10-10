@@ -14,7 +14,7 @@ uv sync --extra dev
 uv run pytest
 uv run pytest tests/test_core.py                     # single file
 uv run pytest tests/test_core.py::test_letter_start  # single test
-uv run tox run-parallel                              # the full matrix, as CI runs it
+uv run tox run-parallel                              # the full matrix, run before opening a pull request
 uv run tox r -e py3.13                               # one interpreter
 uv run tox r -e extras                               # with the dagster and web extras
 
@@ -92,7 +92,7 @@ The registry deliberately knows nothing about implementations — a `TaskDefinit
 
 `jobs.py` wraps ops into `@job`s and exports a `Definitions` object; `dagster dev -f` loads that file. Changing execution semantics means editing both paths in `ops.py`.
 
-`tests/test_dagster.py` covers this backend and skips itself when the `dagster` extra is absent, so only the `extras` tox environment (and the `extras` CI job) actually runs it.
+`tests/test_dagster.py` covers this backend and skips itself when the `dagster` extra is absent, so only the `extras` tox environment (which the linux job of CI runs) actually runs it.
 
 ### Console output (`src/sed2/console.py`)
 
@@ -116,7 +116,9 @@ Full details in `docs/development.md`. In short:
 
 - `develop` is the default branch and everything is integrated into it; `main` tracks the latest release and is only moved by the `sync-main` job.
 - Every change goes through a pull request against `develop`; there is no bypass, including for the maintainer.
-- Four checks are required: `tests` (the matrix plus the extras job), `ruff`, `ty`, `docs`.
+- Four checks are required: `tests` (the test matrix), `ruff`, `ty`, `docs`.
+- Continuous integration is kept minimal: the test matrix is python 3.14 only, the `extras` environment on linux and `py3.14` on macos and windows; python 3.13 runs locally with `tox run-parallel`. Every workflow cancels a superseded run (`cancel-in-progress: true`), uv caches packages and interpreters, pull requests build the docs without uploading them.
+- Design documents and plans of coding agents (`docs/superpowers/`, `superpowers/`, `.claude/plans/`, `.claude/specs/`) are gitignored and never committed.
 - Branch protection lives in `.github/rulesets/` as JSON and is applied with `.github/rulesets/apply.sh`.
 - `ty` runs with `error-on-warning`, so warnings are failures. Suppress an unavoidable one with `# ty: ignore[rule-name]`, never a blanket comment.
 - Docstrings are required by ruff in the tests as well as in the package (google convention).

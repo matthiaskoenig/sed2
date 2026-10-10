@@ -15,6 +15,13 @@ src/sed2.egg-info/
 # built documentation, nothing rendered is committed
 site
 
+# working files of coding agents, their design documents and plans are not committed
+.superpowers/
+superpowers/
+docs/superpowers/
+.claude/plans/
+.claude/specs/
+
 # tool caches
 .cache
 .pytest_cache
