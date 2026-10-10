@@ -1,4 +1,5 @@
 """Console visualization of SED2 workflows using Rich."""
+
 from typing import Any
 
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from rich.text import Text
 from rich.tree import Tree
 
 from sed2.console import console
-from sed2.core import Data, Task, Workflow
+from sed2.core import Task, Workflow
 
 
 def _format_value(value: Any) -> Text:
@@ -74,7 +75,9 @@ def _connections_table(workflow: Workflow) -> Table | None:
     if not rows:
         return None
 
-    table = Table(title="Connections", box=None, header_style="bold dim", padding=(0, 2))
+    table = Table(
+        title="Connections", box=None, header_style="bold dim", padding=(0, 2)
+    )
     table.add_column("From task")
     table.add_column("Port")
     table.add_column("To task")

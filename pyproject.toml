@@ -1,29 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "sed2"
-version = "0.1.0"
-description = "Add your description here"
+dynamic = ["version"]
+description = "Python prototype of SED2, a format for describing computational simulation experiments."
 readme = "README.md"
 requires-python = ">=3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+	{name="Matthias König", email="konigmatt@googlemail.com"},
+]
+maintainers = [
+	{name="Matthias König", email="konigmatt@googlemail.com"},
+]
+classifiers = [
+	"Development Status :: 3 - Alpha",
+	"Intended Audience :: Science/Research",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
+	"Programming Language :: Python :: Implementation :: CPython",
+	"Topic :: Scientific/Engineering",
+	"Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+keywords = [
+	"SED-ML",
+	"SED2",
+	"simulation experiment",
+	"COMBINE",
+	"standardization",
+	"computational modeling",
+]
 dependencies = [
-    "pydantic>=2.13.4",
-    "rich>=15.0.0",
-    "sbmlutils>=0.9.6",
+	"pydantic>=2.13.4",
+	"rich>=15.0.0",
+	"sbmlutils>=0.9.6",
 ]
 
 [project.optional-dependencies]
+# execution backend, see `sed2.implementations.dagster`
 dagster = [
-    "dagster>=1.9",
-    "dagster-webserver>=1.9",
-    "pandas>=2.0",
+	"dagster>=1.9",
+	"dagster-webserver>=1.9",
+	"pandas>=2.0",
 ]
+# form based workflow builder, see `sed2.webapp`
 web = [
-    "streamlit>=1.35",
+	"streamlit>=1.35",
+]
+dev = [
+	# the optional backends have to import for the type check and the api reference
+	"sed2[dagster,web]",
+	"bump-my-version>=1.5.1",
+	"ruff>=0.16.6",
+	"pre-commit>=4.6.2",
+	"ty>=0.0.79",
+	"tox>=4.61.2",
+	"pytest>=9.1.1",
+	"zensical>=0.0.60",
+	"mkdocstrings-python>=2.0.8",
 ]
 
-[dependency-groups]
-dev = [
-    "pytest>=8.0.0",
-]
+[project.urls]
+Homepage = "https://matthiaskoenig.github.io/sed2"
+Documentation = "https://matthiaskoenig.github.io/sed2"
+Repository = "https://github.com/matthiaskoenig/sed2"
+Issues = "https://github.com/matthiaskoenig/sed2/issues"
+Changelog = "https://github.com/matthiaskoenig/sed2/tree/develop/release-notes"
+
+[tool.hatch.version]
+path = "./src/sed2/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sed2"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
+# the suite runs against a bare checkout, without an installed package
 pythonpath = ["src"]
+
+[tool.ty.environment]
+# the package lives in the src layout; the checked python version is inferred
+# from `project.requires-python` (i.e. the oldest supported version)
+root = ["./src", "."]
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.terminal]
+# warnings are failures: keep the codebase free of any diagnostic
+error-on-warning = true

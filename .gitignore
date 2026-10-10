@@ -11,3 +11,11 @@ __pycache__
 dist
 src/sed2.egg-info/
 .venv
+
+# built documentation, nothing rendered is committed
+site
+
+# tool caches
+.cache
+.pytest_cache
+.ruff_cache

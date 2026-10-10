@@ -60,17 +60,14 @@
       "title": "BQM",
       "type": "string"
     },
-    "DataType": {
-      "properties": {},
-      "title": "DataType",
-      "type": "object"
-    },
     "KisaoId": {
+      "description": "Identifier of an algorithm or an algorithm parameter in the KISAO ontology.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "KisaoId",
       "type": "object"
     },
     "Markdown": {
+      "description": "Markdown notes attached to a SED2 element.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "Markdown",
       "type": "object"
@@ -98,13 +95,14 @@
         "datatype": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DataType"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
-          "default": null
+          "default": null,
+          "title": "Datatype"
         },
         "units": {
           "anyOf": [
@@ -122,6 +120,7 @@
       "type": "object"
     },
     "Unit": {
+      "description": "Unit of the values a port carries.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "Unit",
       "type": "object"

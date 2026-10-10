@@ -15,7 +15,8 @@
     "inputs": {
       "location": {
         "description": "File path or URI of the model",
-        "required": true
+        "required": true,
+        "datatype": "str"
       },
       "language": {
         "description": "Model language URN (e.g. 'urn:sedml:language:sbml')",
