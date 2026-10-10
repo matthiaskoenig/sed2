@@ -1,7 +1,8 @@
 """Dagster ops implementing SED2 task types.
 
-Requires: pip install 'sed2[dagster]'
+Requires the `dagster` extra, i.e. `uv sync --extra dagster`.
 """
+
 import pandas as pd
 from dagster import OpExecutionContext, Out, Output, op
 
@@ -26,9 +27,13 @@ def data_read_op(
     elif format == "parquet":
         df = pd.read_parquet(path)
     else:
-        raise ValueError(f"Unsupported format: '{format}'. Choose from: csv, tsv, parquet")
+        raise ValueError(
+            f"Unsupported format: '{format}'. Choose from: csv, tsv, parquet"
+        )
 
-    context.log.info(f"Read {len(df)} rows × {len(df.columns)} columns from '{path}'")
+    context.log.info(
+        "Read %d rows × %d columns from '%s'", len(df), len(df.columns), path
+    )
     yield Output(df, "data")
 
 
@@ -49,6 +54,8 @@ def run_data_read(task: DataRead, resolved_inputs: dict) -> dict[str, pd.DataFra
     elif format_ == "parquet":
         df = pd.read_parquet(path)
     else:
-        raise ValueError(f"Unsupported format: '{format_}'. Choose from: csv, tsv, parquet")
+        raise ValueError(
+            f"Unsupported format: '{format_}'. Choose from: csv, tsv, parquet"
+        )
 
     return {"data": df}

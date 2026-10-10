@@ -1,4 +1,5 @@
 """Concrete example: read input_data.csv using the DataRead task and Dagster."""
+
 from pathlib import Path
 
 from sed2.core import Data, DataRead, TaskParameter, Workflow

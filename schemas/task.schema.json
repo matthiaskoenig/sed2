@@ -1,6 +1,7 @@
 {
   "$defs": {
     "AltDefinition": {
+      "description": "Definition of an algorithm which has no KISAO term yet.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "AltDefinition",
       "type": "object"
@@ -273,6 +274,7 @@
       "type": "object"
     },
     "DataType": {
+      "description": "Type of the values a port carries.\n\nA stub, the model carries no fields yet. The registry describes the type of\na port with the plain string of `PortSchema.datatype` until this is filled\nin.",
       "properties": {},
       "title": "DataType",
       "type": "object"
@@ -416,11 +418,13 @@
       "type": "object"
     },
     "KisaoId": {
+      "description": "Identifier of an algorithm or an algorithm parameter in the KISAO ontology.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "KisaoId",
       "type": "object"
     },
     "Markdown": {
+      "description": "Markdown notes attached to a SED2 element.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "Markdown",
       "type": "object"
@@ -787,6 +791,7 @@
       "type": "object"
     },
     "Unit": {
+      "description": "Unit of the values a port carries.\n\nA stub, the model carries no fields yet.",
       "properties": {},
       "title": "Unit",
       "type": "object"
